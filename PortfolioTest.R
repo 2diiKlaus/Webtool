@@ -39,10 +39,10 @@ source(paste0(Location,"GlobalPortCheckFunctions.R"))
 ParameterFile <- read.csv(paste0(Location,"Investor_ParameterFile.csv"), stringsAsFactors = FALSE, strip.white = TRUE)
 Startyear <- as.numeric(format(Sys.time(), "%Y"))
 
-# - - - - -
-# IV) initiate log file----
-# - - - - -
-initiateLogFile()
+# # - - - - -
+# # IV) initiate log file----
+# # - - - - -
+# initiateLogFile()
 
 # - - - - -
 # |------------------------------|
