@@ -100,7 +100,10 @@ EQSectorProd <- production_check(Results_combin_EQ)
 # #################
 
 template <- (readLines("WebTemplate.tex",encoding="UTF-8"))
-ReportTranslation <- readRDS("ReportTranslation.Rda")
+# ReportTranslation <- readRDS("ReportTranslation.Rda")
+
+ReportTranslation <- read.csv("ReportTranslation.csv", strip.white = T,stringsAsFactors = F)
+
 RT <- preptranslations("Report",ReportTranslation, "EN", Startyear)
 
 EQReportData <- ReportData()
