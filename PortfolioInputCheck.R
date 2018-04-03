@@ -61,6 +61,7 @@ InvestorName <- NameInput$InvestorName
 # |------------------------------|
 # - - - - -
 Portfolio <- read.csv("Portfolio_Input.csv", strip.white = TRUE, stringsAsFactors = FALSE)
+# Portfolio <- read.csv("PortfolioInput_error.csv", strip.white = TRUE, stringsAsFactors = FALSE)
 if(dim(Portfolio)[2] != 2 & colnames(Portfolio)[1] == "ISIN.Position"){
   Portfolio <- read.csv("Portfolio_Input.csv", strip.white = TRUE, stringsAsFactors = FALSE, sep = ";", dec = ",")
 }
@@ -131,6 +132,7 @@ if (ErrorCount == 0){
   # 3b) Merge Portfolio Data with fund data for the lookthrough and calculate owned holdings of Portfolios----
   #All Instruments (R-pull with Port-Weight for both EQY & CBonds):
   Portfolio_LookThrough <- merge(Fund_Data, subset(Portfolio, select = c("ISIN", "ValueUSD")),  by.y = "ISIN", by.x = "FundISIN")
+  if (exists("Portfolio_LookThrough") & nrow(Portfolio_LookThrough)>0){
   Portfolio_LookThrough <- merge(Portfolio_LookThrough, unique(subset(BBGPORTOutput, select = c("ISIN", "SharePrice", "Group"))),by.x = "HoldingISIN", by.y = "ISIN", all.x = TRUE, all.y = FALSE)
   Portfolio_LookThrough$Position <- Portfolio_LookThrough$ValueUSD * Portfolio_LookThrough$value / 100
   Portfolio_LookThrough$Position[Portfolio_LookThrough$ValueUnit == "SharesPerUSD"] <- Portfolio_LookThrough$ValueUSD[Portfolio_LookThrough$ValueUnit == "SharesPerUSD"] * Portfolio_LookThrough$value[Portfolio_LookThrough$ValueUnit == "SharesPerUSD"] * Portfolio_LookThrough$SharePrice[Portfolio_LookThrough$ValueUnit == "SharesPerUSD"]
@@ -164,16 +166,19 @@ if (ErrorCount == 0){
     LOSTISINS <- setdiff(Portfolio$ISIN,c(PortfolioData_Funds$ISIN,PortfolioData_wo_BBG$ISIN,PortfolioData_w_BBG_test$ISIN))
   }
   
-  
   Portfolio <- subset(Portfolio, !is.na(Group) & !ISIN %in% Portfolio_LookThrough$FundISIN)
+  }
   
   # Create the equity portfolio input files for the fund analysis
   Portfolio <- subset(Portfolio, select = c("ISIN", "Group", "ValueUSD"))
   Portfolio$HoldingType <- "Direct Holding"
+  
+  if (exists("Portfolio_LookThrough") & nrow(Portfolio_LookThrough)>0){
   Portfolio_Funds <- subset(Portfolio_LookThrough, select = c("HoldingISIN", "Group", "Position"))
   Portfolio_Funds <- dplyr::rename(Portfolio_Funds, ISIN = HoldingISIN, ValueUSD = Position)
   Portfolio_Funds_summed <- aggregate(Portfolio_Funds["ValueUSD"], by=Portfolio_Funds[,c("ISIN", "Group")], FUN=sum, na.rm = TRUE)
   Portfolio_Funds_summed$HoldingType <- "Fund Holding"
+  }
   
   TotalPortfolio <- Portfolio
   if (exists("Portfolio_Funds_summed")==TRUE){
